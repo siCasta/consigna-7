@@ -1,6 +1,7 @@
 import app from './src/settings.js'
 import http from 'http'
 import { Server } from 'socket.io'
+import mongoose from 'mongoose'
 
 const port = normalizePort(process.env.PORT || 8080)
 app.set('port', port)
@@ -8,9 +9,14 @@ app.set('port', port)
 const server = http.createServer(app)
 const io = new Server(server)
 
-server.listen(port)
-server.on('error', onError)
-server.on('listening', onListening)
+mongoose.connect('mongodb+srv://siCasta:KAAbg22xkalVCHg6@cluster0.7sqyldr.mongodb.net/consigna-11?retryWrites=true&w=majority').then(() => {
+    server.listen(port)
+    server.on('error', onError)
+    server.on('listening', onListening)
+}).catch(err => {
+    console.log(err)
+    process.exit(1)
+})
 
 io.on('connection', socket => {
     console.log('a user connected')

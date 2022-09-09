@@ -1,8 +1,8 @@
-import db from '../db/config.js'
+import Chat from '../models/Chat.js'
 
 export async function getMessages(req, res, next) {
     try {
-        const messagesDB = await db('chat').select('*')
+        const messagesDB = await Chat.find()
 
         return res.status(200).json({
             message: 'Mensajes obtenidos correctamente',
@@ -16,13 +16,11 @@ export async function getMessages(req, res, next) {
 
 export async function createMessage(req, res, next) {
     try {
-        const { message, user } = req.body
+        const { message, author } = req.body
 
-        const messageDB = await db('chat').insert({
-            user,
-            message,
-            date: new Date().toLocaleDateString(),
-            time: new Date().toLocaleTimeString()
+        const messageDB = await Chat.create({
+            author,
+            message
         })
 
         return res.status(200).json({

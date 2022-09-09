@@ -1,16 +1,32 @@
-import cacheC from '../../utils/cache.js'
-import db from '../db/config.js'
-import { randomId } from '../../utils/randomid.js'
+import Product from '../models/Product.js'
+import { faker } from '@faker-js/faker'
 
-const cache = new cacheC
+export async function randomProducts(req, res) {
+    function randomProduct() {
+        return {
+            id: faker.datatype.uuid(),
+            title: faker.commerce.product(),
+            price: faker.commerce.price(),
+            thumbnail: faker.image.business()
+        }
+    }
+
+    let p = []
+
+    for (let i = 0; i < 5; i++) {
+        p.push(randomProduct())
+    }
+
+    res.json(p)
+}
 
 export async function getProducts(req, res, next) {
     try {
-        const productsDB = await db('products').select('*')
+        const products = await Product.find()
 
         return res.status(200).json({
             message: 'Productos obtenidos correctamente',
-            data: productsDB,
+            data: products,
             status: 'success'
         })
     } catch (err) {
@@ -22,30 +38,11 @@ export async function getProduct(req, res, next) {
     try {
         const { id } = req.params
 
-        const productCache = cache.get(`product-${id}`)
-
-        if (!productCache) {
-            const productDB = await db('products').where({ id }).select('*')
-
-            if (!productDB) {
-                return next({
-                    status: 404,
-                    message: 'Producto no encontrado'
-                })
-            }
-
-            cache.set(`product-${id}`, productDB)
-
-            return res.status(200).json({
-                message: 'Producto obtenido correctamente',
-                data: productDB,
-                status: 'success'
-            })
-        }
+        const product = await Product.findById(id)
 
         return res.status(200).json({
             message: 'Producto obtenido correctamente',
-            data: productCache,
+            data: product,
             status: 'success'
         })
 
@@ -65,10 +62,15 @@ export async function createProduct(req, res, next) {
             })
         }
 
-        await db('products').insert({ id: randomId(), title, price, thumbnail })
+        const product = await Product.create({
+            title,
+            price,
+            thumbnail
+        })
 
         return res.status(201).json({
             message: 'Producto creado correctamente',
+            data: product,
             status: 'success'
         })
     } catch (err) {
@@ -82,7 +84,7 @@ export async function updateProduct(req, res, next) {
         const { id } = req.params
         const { title, price, thumbnail } = req.body
 
-        const product = await db('products').where({ id }).select('*')
+        const product = await Product.findById(id)
 
         if (!product) {
             return next({
@@ -98,10 +100,7 @@ export async function updateProduct(req, res, next) {
             })
         }
 
-        await db('products').where({ id }).update({ title, price, thumbnail })
-        const productUpdated = await db('products').where({ id }).select('*')
-
-        cache.set(`product-${id}`, productUpdated)
+        await product.update(req.body)
 
         return res.status(200).json({
             message: 'Producto actualizado correctamente',
@@ -116,7 +115,7 @@ export async function deleteProduct(req, res, next) {
     try {
         const { id } = req.params
 
-        const product = await db('products').where({ id }).select('*')
+        const product = await Product.findById(id)
 
         if (!product) {
             return next({
@@ -125,10 +124,7 @@ export async function deleteProduct(req, res, next) {
             })
         }
 
-        await db('products').where({ id }).del()
-        const products = await db('products').select('*')
-
-        cache.set('products', products)
+        await product.remove()
 
         return res.status(200).json({
             message: 'Producto eliminado correctamente',
