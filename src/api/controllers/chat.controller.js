@@ -1,12 +1,20 @@
 import Chat from '../models/Chat.js'
+import { normalize, schema, denormalize } from 'normalizr'
 
 export async function getMessages(req, res, next) {
     try {
-        const messagesDB = await Chat.find()
+        const messagesDB = await Chat.find().select('-__v')
+
+        const author = new schema.Entity('authors')
+        const chat = new schema.Entity('messages', {
+            author
+        }, { idAttribute: '_id' })
+
+        const normalizeData = normalize(JSON.parse(JSON.stringify(messagesDB)), [chat])
 
         return res.status(200).json({
             message: 'Mensajes obtenidos correctamente',
-            data: messagesDB,
+            data: normalizeData.entities,
             status: 'success'
         })
     } catch (err) {

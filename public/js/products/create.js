@@ -3,21 +3,9 @@ function $(query) {
 }
 
 const socket = io()
-const user = await Swal.fire({
-    title: 'Registrate',
-    text: 'Ingresa tu email',
-    input: 'text',
-    inputValidator: (value) => {
-        return !value && 'Nesesitas escribir tu email!'
-    },
-    allowOutsideClick: false,
-    confirmButtonText: 'Enter',
-    allowEscapeKey: false,
-}).then(result => {
-    socket.connect()
-    socket.emit('connected', result.value)
-    return result.value
-})
+
+const user = sessionStorage.getItem('user')
+
 const inputDefaultURL = $('#thumbnail')
 
 inputDefaultURL.placeholder = 'Loading...'
@@ -63,7 +51,7 @@ form.addEventListener('submit', async e => {
 
         e.target.reset()
 
-        socket.emit('create', true)
+        if (!!user) socket.emit('create', true)
 
         Swal.fire({
             title: 'Producto creado',
@@ -117,7 +105,7 @@ const chatinput = $('#chatinput')
 
 chatinput.addEventListener('keyup', (e) => {
     if (e.key === 'Enter') {
-        if (chatinput.value.trim().length > 0) {
+        if (chatinput.value.trim().length > 0 && !!user) {
             fetch('/api/chat', {
                 method: 'POST',
                 body: JSON.stringify({
@@ -132,6 +120,13 @@ chatinput.addEventListener('keyup', (e) => {
             socket.emit('message', true)
 
             chatinput.value = ''
+        } else {
+            Swal.fire({
+                title: 'Error',
+                text: 'Ingresa para usar el chat',
+                icon: 'error',
+                confirmButtonText: 'Aceptar'
+            })
         }
     }
 })

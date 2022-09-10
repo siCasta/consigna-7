@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include('./layouts/header.ejs') %>
+    <title>EJS App | Login</title>
+</head>
+
+<body class="bg-dark vh-100">
+    <div class="container">
+        <div class="row d-flex justify-content-center pt-5">
+            <div class="col-md-3 d-flex flex-column align-items-center justify-content-center">
+                <a href="/products" class="btn btn-primary mb-4">Ver Productos</a>
+                <h1 class="text-light">Crear Producto</h1>
+                <form id="login" class="w-100">
+                    <div class="mb-3">
+                        <label for="title" class="form-label text-light">Email</label>
+                        <input type="text" class="form-control" id="title" name="email" placeholder="Example">
+                    </div>
+                    <div class="mb-3">
+                        <label for="title" class="form-label text-light">Nombre</label>
+                        <input type="text" class="form-control" id="title" name="name" placeholder="Example">
+                    </div>
+                    <div class="mb-3">
+                        <label for="title" class="form-label text-light">Apellido</label>
+                        <input type="text" class="form-control" id="title" name="surname" placeholder="Example">
+                    </div>
+                    <div class="mb-3">
+                        <label for="price" class="form-label text-light">Edad</label>
+                        <input type="number" class="form-control" id="price" name="age" placeholder="10">
+                    </div>
+                    <div class="mb-3">
+                        <label for="title" class="form-label text-light">Alias</label>
+                        <input type="text" class="form-control" id="title" name="alias" placeholder="Example">
+                    </div>
+                    <div class="mb-3">
+                        <label for="title" class="form-label text-light">Avatar</label>
+                        <input type="text" class="form-control" id="title" name="avatar" placeholder="Example">
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="/js/products/login.js"></script>
+</body>
+
+</html>
