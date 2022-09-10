@@ -37,14 +37,14 @@ io.on('connection', socket => {
         const chatlog = await responseC.json()
 
         socket.emit('products', products.data)
-        io.emit('log', chatlog.data)
+        io.emit('log', chatlog)
     })
 
     socket.on('message', async data => {
         const response = await fetch('http://localhost:8080/api/chat')
         const chatlog = await response.json()
 
-        io.emit('log', chatlog.data)
+        io.emit('log', chatlog)
     })
 })
 

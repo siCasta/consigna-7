@@ -12,9 +12,12 @@ export async function getMessages(req, res, next) {
 
         const normalizeData = normalize(JSON.parse(JSON.stringify(messagesDB)), [chat])
 
+        const per = (JSON.stringify(normalizeData).length / JSON.stringify(messagesDB).length) * 100
+
         return res.status(200).json({
             message: 'Mensajes obtenidos correctamente',
             data: normalizeData.entities,
+            percentage: per,
             status: 'success'
         })
     } catch (err) {

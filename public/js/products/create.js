@@ -3,10 +3,15 @@ function $(query) {
 }
 
 const socket = io()
-
 const user = sessionStorage.getItem('user')
-
 const inputDefaultURL = $('#thumbnail')
+const logout = $('#logout')
+const login = $('#login')
+
+logout.addEventListener('click', () => {
+    if (user) sessionStorage.removeItem('user')
+    location.href = '/products/create'
+})
 
 inputDefaultURL.placeholder = 'Loading...'
 inputDefaultURL.disabled = true
@@ -17,6 +22,11 @@ fetch('https://picsum.photos/1000').then(response => {
 })
 
 const form = $('#form')
+
+if (!!user) {
+    socket.emit('connected')
+    login.style.display = 'none'
+}
 
 form.addEventListener('submit', async e => {
     e.preventDefault()
@@ -105,11 +115,18 @@ const chatinput = $('#chatinput')
 
 chatinput.addEventListener('keyup', (e) => {
     if (e.key === 'Enter') {
-        if (chatinput.value.trim().length > 0 && !!user) {
+        if (!user) {
+            Swal.fire({
+                title: 'Error',
+                text: 'Ingresa para usar el chat',
+                icon: 'error',
+                confirmButtonText: 'Aceptar'
+            })
+        } else if (chatinput.value.trim().length > 0) {
             fetch('/api/chat', {
                 method: 'POST',
                 body: JSON.stringify({
-                    user,
+                    author: JSON.parse(user),
                     message: chatinput.value,
                 }),
                 headers: {
@@ -120,27 +137,26 @@ chatinput.addEventListener('keyup', (e) => {
             socket.emit('message', true)
 
             chatinput.value = ''
-        } else {
-            Swal.fire({
-                title: 'Error',
-                text: 'Ingresa para usar el chat',
-                icon: 'error',
-                confirmButtonText: 'Aceptar'
-            })
         }
     }
 })
 
 socket.on('log', data => {
     const chat = $('#chat')
+    const chattext = $('#chattext')
+    const datalog = data.data.messages
+    const per = data.percentage
+
+    chattext.innerHTML = `Chat (${Math.floor(per)}%)`
+
     let messages = ''
-    data.forEach(message => {
+    for (const key in datalog) {
         messages += `<div class="text-light">
-            <span class="${message.user === user ? 'text-primary' : 'text-warning'}"><strong>${message.user}</strong></span>
-            <span class="text-secondary">[${message.date} ${message.time}]</span>
-            <span class="text-light">: ${message.message}</span>
+            <span class="${datalog[key].author !== JSON.parse(user).email ? 'text-primary' : 'text-warning'}"><strong>${datalog[key].author}</strong></span>
+            <span class="text-secondary">[${new Date(datalog[key].createdAt).toLocaleDateString()} ${new Date(datalog[key].createdAt).toLocaleTimeString()}]</span>
+            <span class="text-light">: ${datalog[key].message}</span>
         </div>`
-    })
+    }
 
     chat.innerHTML = messages
     chat.scrollTop = chat.scrollHeight + 100

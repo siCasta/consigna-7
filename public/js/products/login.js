@@ -17,6 +17,7 @@ form.addEventListener('submit', (e) => {
     })
 
     data.age = parseInt(data.age)
+    data.id = data.email
 
     sessionStorage.setItem('user', JSON.stringify(data))
 
